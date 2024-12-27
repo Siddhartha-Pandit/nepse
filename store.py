@@ -6,12 +6,12 @@ print(ssl.OPENSSL_VERSION)
 
 
 # MongoDB configuration
-MONGO_URI = "mongodb+srv://devsiddharthapandit:CzUaLHtIfZ9eeWNF@cluster0.sq0xe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"  # Update with your MongoDB Atlas URI
+# MONGO_URI = "mongodb+srv://devsiddharthapandit:CzUaLHtIfZ9eeWNF@cluster0.sq0xe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"  # Update with your MongoDB Atlas URI
 # MONGO_URI = (
 #     "mongodb+srv://devsiddharthapandit:CzUaLHtIfZ9eeWNF@cluster0.sq0xe.mongodb.net/"
 #     "?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true"
 # )
-# MONGO_URI = "mongodb://localhost:27017/"  # Update if needed
+MONGO_URI = "mongodb://localhost:27017/"  # Update if needed
 database_name = "nepse"
 collection_name = "dailyprice"
 

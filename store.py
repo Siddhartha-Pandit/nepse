@@ -16,7 +16,7 @@ database_name = "nepse"
 collection_name = "dailyprice"
 
 # CSV file configuration
-csv_file_path = "1.csv"  # Replace with your CSV file path
+csv_file_path = "12.csv"  # Replace with your CSV file path
 
 
 

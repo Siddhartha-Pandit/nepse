@@ -13,10 +13,11 @@ print(ssl.OPENSSL_VERSION)
 # )
 MONGO_URI = "mongodb://localhost:27017/"  # Update if needed
 database_name = "nepse"
+# database_name = "nepse1"
 collection_name = "dailyprice"
 
 # CSV file configuration
-csv_file_path = "12.csv"  # Replace with your CSV file path
+csv_file_path = "1.csv"  # Replace with your CSV file path
 
 
 

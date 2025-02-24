@@ -12,8 +12,8 @@ print(ssl.OPENSSL_VERSION)
 #     "?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true"
 # )
 MONGO_URI = "mongodb://localhost:27017/"  # Update if needed
-database_name = "nepse"
-# database_name = "nepse1"
+# database_name = "nepse"
+database_name = "nepse1"
 collection_name = "dailyprice"
 
 # CSV file configuration

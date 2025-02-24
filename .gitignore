@@ -4,4 +4,5 @@
 # Ignore CSV files
 *.csv
 nepse.dailyprice1.json
+nepse.dailyprice_hist.json
 /todayprice

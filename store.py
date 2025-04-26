@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from datetime import datetime
 import ssl
 print(ssl.OPENSSL_VERSION)
-
+##
 
 # MongoDB configuration
 # MONGO_URI = "mongodb+srv://devsiddharthapandit:CzUaLHtIfZ9eeWNF@cluster0.sq0xe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"  # Update with your MongoDB Atlas URI

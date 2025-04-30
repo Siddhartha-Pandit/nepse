@@ -1,117 +1,116 @@
 import csv
-from pymongo import MongoClient, errors  # Import errors module
+from pymongo import MongoClient, errors
 from datetime import datetime
 import ssl
-print(ssl.OPENSSL_VERSION)
-##
+
+# Print OpenSSL version for debugging TLS
+print("OpenSSL version:", ssl.OPENSSL_VERSION)
 
 # MongoDB configuration
 MONGO_URI = (
-   "mongodb+srv://devsiddharthapandit:6uIGmpW91jslljIv@cluster0.s6bi7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    "mongodb+srv://devsiddharthapandit:6uIGmpW91jslljIv"
+    "@cluster0.s6bi7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 )
+DATABASE = "Nepse"
+COLLECTION = "dailyprice"
+CSV_PATH = "12.csv"
 
-database_name = "Nepse"
-collection_name = "dailyprice"
-csv_file_path = "1.csv" 
+# How many documents per batch insert
+BATCH_SIZE = 500  # tune between 100–1000 for optimal throughput :contentReference[oaicite:0]{index=0}
+
 def test_mongo_connection(uri: str, timeout_ms: int = 5000) -> bool:
     """
-    Attempts to connect to MongoDB and run a ping command.
+    Attempts to connect to MongoDB over TLS/SSL and run a ping command.
     Returns True if successful, False otherwise.
     """
     try:
-        # 2. Create client with a timeout and SSL enabled
         client = MongoClient(
             uri,
-            serverSelectionTimeoutMS=timeout_ms,  # how long to wait for server selection
-            tls=True,                             # enforce TLS/SSL
+            serverSelectionTimeoutMS=timeout_ms,
+            tls=True,
         )
-        # 3. Force connection on a request as the
-        # “lazy” connect only happens on first operation
         client.admin.command("ping")
         print("✅ Successfully connected to MongoDB.")
         return True
-
     except errors.ServerSelectionTimeoutError as err:
         print(f"❌ Connection timed out: {err}")
     except errors.ConfigurationError as err:
         print(f"❌ Configuration error: {err}")
     except Exception as err:
         print(f"❌ Unexpected error: {err}")
-
     return False
 
-# csv_file_path = "1.csv"  # Replace with your CSV file path
-
-def safe_float(value):
+def safe_float(val):
     try:
-        return float(value)
+        return float(val)
     except (ValueError, TypeError):
         return None
 
-def safe_int(value):
+def safe_int(val):
     try:
-        return int(float(value))  # Handles cases like "30.0"
+        return int(float(val))
     except (ValueError, TypeError):
         return None
 
-def safe_date(value):
+def safe_date(val):
     try:
-        return datetime.strptime(value, "%m/%d/%Y")  # Adjust format if needed
+        return datetime.strptime(val, "%m/%d/%Y")
     except (ValueError, TypeError):
         return None
 
-def read_csv_and_store_in_mongodb():
-    try:
-        # Connect to MongoDB
-        print("Connecting to MongoDB...")
-        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-        db = client[database_name]
-        collection = db[collection_name]
+def read_csv_and_store_in_batches(
+    uri: str, db_name: str, coll_name: str, csv_path: str, batch_size: int
+):
+    # Establish client and get collection
+    client = MongoClient(uri, tls=True)
+    db = client[db_name]
+    coll = db[coll_name]
+    coll.with_options(write_concern=client.write_concern)  # inherit default write concern
 
-        # Test MongoDB connection
-        client.server_info()
-        print("MongoDB connection successful.")
+    batch = []
+    total_inserted = 0
 
-        # Read CSV file
-        with open(csv_file_path, mode='r') as file:
-            csv_reader = csv.DictReader(file)
+    with open(csv_path, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Map CSV columns to document fields
+            doc = {
+                "BusinessDate": safe_date(row.get("Business Date")),
+                "SecuriryId": row.get("Security Id"),
+                "Symbol": row.get("Symbol"),
+                "SecurityName": row.get("Security Name"),
+                "OpenPrice": safe_float(row.get("Open Price")),
+                "HighPrice": safe_float(row.get("High Price")),
+                "LowPrice": safe_float(row.get("Low Price")),
+                "ClosePrice": safe_float(row.get("Close Price")),
+                "TotalTradedQuantity": safe_float(row.get("Total Traded Quantity")),
+                "TotalTradedValue": safe_float(row.get("Total Traded Value")),
+                "PreviousDayClosePrice": safe_float(row.get("Previous Day Close Price")),
+                "FiftyTwoWeekHigh": safe_float(row.get("Fifty Two Week High")),
+                "FiftyTwoWeekLow": safe_float(row.get("Fifty Two Week Low")),
+                "LastUpdatedPrice": safe_float(row.get("Last Updated Price")),
+                "TotalTrades": safe_int(row.get("Total Trades")),
+                "AverageTradedPrice": safe_float(row.get("Average Traded Price")),
+                "MarketCapitalization": safe_float(row.get("Market Capitalization")),
+            }
+            batch.append(doc)
 
-            # Insert data into MongoDB
-            data_to_insert = []
-            for row in csv_reader:
-                # Clean and transform the row to handle blank fields
-                data_to_insert.append({
-                    "BUSINESS_DATE": safe_date(row.get("Business Date")),
-                    "SECURITY_ID": row.get("Security Id", None),
-                    "SYMBOL": row.get("Symbol", None),
-                    "SECURITY_NAME": row.get("Security Name", None),
-                    "OPEN_PRICE": safe_float(row.get("Open Price")),
-                    "HIGH_PRICE": safe_float(row.get("High Price")),
-                    "LOW_PRICE": safe_float(row.get("Low Price")),
-                    "CLOSE_PRICE": safe_float(row.get("Close Price")),
-                    "TOTAL_TRADED_QUANTITY": safe_float(row.get("Total Traded Quantity")),
-                    "TOTAL_TRADED_VALUE": safe_float(row.get("Total Traded Value")),
-                    "PREVIOUS_DAY_CLOSE_PRICE": safe_float(row.get("Previous Day Close Price")),
-                    "FIFTY_TWO_WEEKS_HIGH": safe_float(row.get("Fifty Two Week High")),
-                    "FIFTY_TWO_WEEKS_LOW": safe_float(row.get("Fifty Two Week Low")),
-                    "LAST_UPDATED_PRICE": safe_float(row.get("Last Updated Price")),
-                    "TOTAL_TRADES": safe_int(row.get("Total Trades")),
-                    "AVERAGE_TRADED_PRICE": safe_float(row.get("Average Traded Price")),
-                    "MARKET_CAPITALIZATION": safe_float(row.get("Market Capitalization")),
-                })
+            # Once batch_size is reached, insert and reset
+            if len(batch) >= batch_size:
+                coll.insert_many(batch, ordered=False)  # unordered for speed :contentReference[oaicite:1]{index=1}
+                total_inserted += len(batch)
+                print(f"Inserted batch of {len(batch)} documents (total {total_inserted})")
+                batch.clear()
 
-            if data_to_insert:
-                collection.insert_many(data_to_insert)
-                print(f"Inserted {len(data_to_insert)} records into MongoDB.")
-            else:
-                print("No data to insert.")
+        # Insert any remaining documents
+        if batch:
+            coll.insert_many(batch, ordered=False)
+            total_inserted += len(batch)
+            print(f"Inserted final batch of {len(batch)} documents (total {total_inserted})")
 
-        # Close MongoDB connection
-        client.close()
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    client.close()
+    print("All done. Total documents inserted:", total_inserted)
 
 if __name__ == "__main__":
-    test_mongo_connection(MONGO_URI)
-    read_csv_and_store_in_mongodb()
+    if test_mongo_connection(MONGO_URI):
+        read_csv_and_store_in_batches(MONGO_URI, DATABASE, COLLECTION, CSV_PATH, BATCH_SIZE)

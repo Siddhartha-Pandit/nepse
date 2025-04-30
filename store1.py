@@ -12,7 +12,7 @@ MONGO_URI = (
 
 database_name = "Nepse"
 collection_name = "dailyprice"
-csv_file_path = "12.csv" 
+csv_file_path = "1.csv" 
 def test_mongo_connection(uri: str, timeout_ms: int = 5000) -> bool:
     """
     Attempts to connect to MongoDB and run a ping command.
@@ -81,23 +81,23 @@ def read_csv_and_store_in_mongodb():
             for row in csv_reader:
                 # Clean and transform the row to handle blank fields
                 data_to_insert.append({
-                    "BUSINESS_DATE": safe_date(row.get("BUSINESS_DATE")),
-                    "SECURITY_ID": row.get("SECURITY_ID", None),
-                    "SYMBOL": row.get("SYMBOL", None),
-                    "SECURITY_NAME": row.get("SECURITY_NAME", None),
-                    "OPEN_PRICE": safe_float(row.get("OPEN_PRICE")),
-                    "HIGH_PRICE": safe_float(row.get("HIGH_PRICE")),
-                    "LOW_PRICE": safe_float(row.get("LOW_PRICE")),
-                    "CLOSE_PRICE": safe_float(row.get("CLOSE_PRICE")),
-                    "TOTAL_TRADED_QUANTITY": safe_float(row.get("TOTAL_TRADED_QUANTITY")),
-                    "TOTAL_TRADED_VALUE": safe_float(row.get("TOTAL_TRADED_VALUE")),
-                    "PREVIOUS_DAY_CLOSE_PRICE": safe_float(row.get("PREVIOUS_DAY_CLOSE_PRICE")),
-                    "FIFTY_TWO_WEEKS_HIGH": safe_float(row.get("FIFTY_TWO_WEEKS_HIGH")),
-                    "FIFTY_TWO_WEEKS_LOW": safe_float(row.get("FIFTY_TWO_WEEKS_LOW")),
-                    "LAST_UPDATED_PRICE": safe_float(row.get("LAST_UPDATED_PRICE")),
-                    "TOTAL_TRADES": safe_int(row.get("TOTAL_TRADES")),
-                    "AVERAGE_TRADED_PRICE": safe_float(row.get("AVERAGE_TRADED_PRICE")),
-                    "MARKET_CAPITALIZATION": safe_float(row.get("MARKET_CAPITALIZATION")),
+                    "BUSINESS_DATE": safe_date(row.get("Business Date")),
+                    "SECURITY_ID": row.get("Security Id", None),
+                    "SYMBOL": row.get("Symbol", None),
+                    "SECURITY_NAME": row.get("Security Name", None),
+                    "OPEN_PRICE": safe_float(row.get("Open Price")),
+                    "HIGH_PRICE": safe_float(row.get("High Price")),
+                    "LOW_PRICE": safe_float(row.get("Low Price")),
+                    "CLOSE_PRICE": safe_float(row.get("Close Price")),
+                    "TOTAL_TRADED_QUANTITY": safe_float(row.get("Total Traded Quantity")),
+                    "TOTAL_TRADED_VALUE": safe_float(row.get("Total Traded Value")),
+                    "PREVIOUS_DAY_CLOSE_PRICE": safe_float(row.get("Previous Day Close Price")),
+                    "FIFTY_TWO_WEEKS_HIGH": safe_float(row.get("Fifty Two Week High")),
+                    "FIFTY_TWO_WEEKS_LOW": safe_float(row.get("Fifty Two Week Low")),
+                    "LAST_UPDATED_PRICE": safe_float(row.get("Last Updated Price")),
+                    "TOTAL_TRADES": safe_int(row.get("Total Trades")),
+                    "AVERAGE_TRADED_PRICE": safe_float(row.get("Average Traded Price")),
+                    "MARKET_CAPITALIZATION": safe_float(row.get("Market Capitalization")),
                 })
 
             if data_to_insert:
